@@ -41,6 +41,14 @@ typedef struct		s_object
 	double 			size;
 }					t_object;
 
+typedef struct 		s_intersec
+{
+	t_object		*obj;
+	t_vector		ray;
+	double 			rlen;
+	t_vector		start;
+}					t_intersec;
+
 typedef struct		s_camera
 {
 	t_vector		origin;

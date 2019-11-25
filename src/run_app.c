@@ -7,6 +7,10 @@ void	run_app(t_rtv *rtv)
 	SDL_Event		e;
 
 	status = 1;
+	SDL_SetRenderDrawColor(rtv->rend, 0, 0, 0, 0xFF);
+	SDL_RenderClear(rtv->rend);
+	render_scene(rtv->rend, rtv->scene);
+	SDL_RenderPresent(rtv->rend);
 	while (status)
 	{
 		while (SDL_PollEvent(&e))
@@ -14,8 +18,5 @@ void	run_app(t_rtv *rtv)
 			if (e.type == SDL_QUIT)
 				status = 0;
 		}
-		SDL_SetRenderDrawColor(rtv->rend, 0, 0, 0, 0xFF);
-		SDL_RenderClear(rtv->rend);
-		SDL_RenderPresent(rtv->rend);
 	}
 }
