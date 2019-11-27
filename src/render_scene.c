@@ -10,21 +10,10 @@ double		get_light_k(t_intersec inter, t_object *light)
 	n3 = ft_vecsub(light->position, n1);
 
 	double tmp = ft_vecdot(n2, n3) / ft_veclen(n2) / ft_veclen(n3);
-	return (tmp * light->size);
-}
-
-double		get_lights_k(t_intersec inter, t_list *lights)
-{
-	t_list_node	*cur_l;
-	double res;
-
-	res = 0;
-	cur_l = lights->begin;
-	while (cur_l)
-	{
-		res += get_light_k(inter, cur_l->content);
-		cur_l = cur_l->next;
-	}
+	if (tmp < 0)
+		return (0);
+	else
+		return (tmp * light->size);
 }
 
 double 		get_intersection(t_vector or, t_vector ray, t_object *obj)
@@ -34,6 +23,43 @@ double 		get_intersection(t_vector or, t_vector ray, t_object *obj)
 		return (sphere_intersection(&or, &ray, &(obj->position), obj->size));
 	}
 }
+
+char 		is_lighted(t_intersec inter, t_object *light, t_list *objects)
+{
+	t_list_node	*cur;
+	double cur_inter;
+	t_vector n1, n3;
+
+	n1 = ft_vecsum(ft_vecscale(inter.ray, inter.rlen), inter.start);
+	n3 = ft_vecsub(light->position, n1 );
+
+	cur = objects->begin;
+	while (cur)
+	{
+		cur_inter = get_intersection(light->position, n3, cur->content);
+		if (!isnan(cur_inter) && cur_inter - 1 > 0.00001)
+			return (0);
+		cur = cur->next;
+	}
+	return (1);
+}
+
+double		get_lights_k(t_intersec inter, t_list *lights, t_list *objects)
+{
+	t_list_node	*cur_l;
+	double res;
+
+	res = 0;
+	cur_l = lights->begin;
+	while (cur_l)
+	{
+		if (is_lighted(inter, cur_l->content, objects))
+			res += get_light_k(inter, cur_l->content);
+		cur_l = cur_l->next;
+	}
+	return (res);
+}
+
 
 t_intersec	find_nearest_inter(t_scene *scene, t_vector ray)
 {
@@ -70,7 +96,7 @@ t_color		get_pixel_color(t_scene *scene, t_vector ray, t_vector origin)
 		return (res);
 	else
 	{
-		k = get_lights_k(tmp, &(scene->lights));
+		k = get_lights_k(tmp, &(scene->lights), &(scene->objects));
 		res.red = tmp.obj->color.red * k;
 		res.green = tmp.obj->color.green * k;
 		res.blue = tmp.obj->color.blue * k;

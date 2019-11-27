@@ -16,20 +16,32 @@ t_scene	*read_scene(t_arguments	*args)
 	res->cam.width = args->w_width;
 	res->cam.height = args->w_height;
 
-	t_object	tmp = {SPHERE, {0, 50, 50}, {0, 0,0},
-					   {100, 100, 0, 0xFF}, 150};
-	ft_lstadd(&(res->objects), ft_lstnew_node(&tmp, sizeof(t_object)));
-	tmp = (t_object){SPHERE, {0, 0, 25}, {0, 0,0},
-					   {100, 0, 100, 0xFF}, 20};
+	t_object	tmp = {SPHERE, {-150, 0, 50}, {0, 0,0},
+					   {0, 255, 255, 0xFF}, 100};
 	ft_lstadd(&(res->objects), ft_lstnew_node(&tmp, sizeof(t_object)));
 
-	tmp = (t_object){INDIRECT_LIGHT, {0, -400, -500}, {0, 0,0},
-					 {100, 0, 100, 0xFF}, 0.7};
-	ft_lstadd(&(res->lights), ft_lstnew_node(&tmp, sizeof(t_object)));
 
-	tmp = (t_object){INDIRECT_LIGHT, {0, 400, -500}, {0, 0,0},
-					 {100, 0, 100, 0xFF}, 0.3};
+	tmp.position.x = 150;
+	tmp.size = 100;
+	tmp.color.green = 0;
+	ft_lstadd(&(res->objects), ft_lstnew_node(&tmp, sizeof(t_object)));
+
+	tmp.position.x = 0;
+	tmp.position.y = 0;
+	tmp.size = 1000;
+	tmp.color.red = 100;
+	ft_lstadd(&(res->objects), ft_lstnew_node(&tmp, sizeof(t_object)));
+
+
+	tmp = (t_object){INDIRECT_LIGHT, {0, 0, -450}, {0, 0,0},
+					 {100, 0, 100, 0xFF}, 1};
+
+
 	ft_lstadd(&(res->lights), ft_lstnew_node(&tmp, sizeof(t_object)));
+	tmp.position.y = 0;
+	tmp.position.z = 0;
+//	ft_lstadd(&(res->lights), ft_lstnew_node(&tmp, sizeof(t_object)));
+
 	return (res);
 }
 
