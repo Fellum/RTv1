@@ -10,6 +10,7 @@
 typedef enum		e_obj_types
 {
 	SPHERE,
+	INV_SPHERE,
 	PLANE,
 	CONE,
 	CYLINDER,

@@ -8,8 +8,8 @@ t_arguments		*read_arguments(int argc, char **argv)
 
 	if (!(res = ft_memalloc(sizeof(t_arguments))))
 		return (NULL);
-	res->w_height = 500;
-	res->w_width = 500;
+	res->w_height = 700;
+	res->w_width = 700;
 	res->fname = argv[0];
 	return (res);
 }

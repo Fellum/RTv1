@@ -2,11 +2,21 @@
 #include "rtv_structs.h"
 #include "vector.h"
 
+t_vector	get_norm(t_vector pos, t_object *obj)
+{
+	if (obj->type == SPHERE)
+		return (ft_vecsub(pos, obj->position));
+	else if (obj->type == PLANE)
+		return (obj->direction);
+	else if (obj->type == INV_SPHERE)
+		return (ft_vecsub(obj->position, pos));
+}
+
 double		get_light_k(t_intersec inter, t_object *light)
 {
 	t_vector n1, n2, n3;
 	n1 = ft_vecsum(ft_vecscale(inter.ray, inter.rlen), inter.start);
-	n2 = ft_vecsub(n1 ,inter.obj->position);
+	n2 = get_norm(n1, inter.obj);
 	n3 = ft_vecsub(light->position, n1);
 
 	double tmp = ft_vecdot(n2, n3) / ft_veclen(n2) / ft_veclen(n3);
@@ -16,12 +26,31 @@ double		get_light_k(t_intersec inter, t_object *light)
 		return (tmp * light->size);
 }
 
-double 		get_intersection(t_vector or, t_vector ray, t_object *obj)
+t_double2 		get_intersection(t_vector or, t_vector ray, t_object *obj)
 {
-	if (obj->type == SPHERE)
+	t_double2 tmp;
+	if (obj->type == SPHERE || obj->type == INV_SPHERE)
 	{
-		return (sphere_intersection(&or, &ray, &(obj->position), obj->size));
+		tmp = sphere_intersection(&or, &ray, &(obj->position), obj->size);
+		return (tmp);
 	}
+	else if (obj->type == PLANE)
+	{
+		tmp = plane_intersection(&or, &ray, &(obj->position), &(obj->direction));
+		return (tmp);
+	}
+}
+
+double 		get_min_pos(t_double2 dbl)
+{
+	if (dbl.a > 0 && dbl.b > 0)
+		return (dbl.a > dbl.b ? dbl.b : dbl.a);
+	else if (dbl.a >= 0 && dbl.b < 0)
+		return (dbl.a);
+	else if (dbl.b >= 0)
+		return (dbl.b);
+	else
+		return (NAN);
 }
 
 char 		is_lighted(t_intersec inter, t_object *light, t_list *objects)
@@ -31,13 +60,13 @@ char 		is_lighted(t_intersec inter, t_object *light, t_list *objects)
 	t_vector n1, n3;
 
 	n1 = ft_vecsum(ft_vecscale(inter.ray, inter.rlen), inter.start);
-	n3 = ft_vecsub(light->position, n1 );
+	n3 = ft_vecsub(n1, light->position );
 
 	cur = objects->begin;
 	while (cur)
 	{
-		cur_inter = get_intersection(light->position, n3, cur->content);
-		if (!isnan(cur_inter) && cur_inter - 1 > 0.00001)
+		cur_inter = get_min_pos(get_intersection(light->position, n3, cur->content));
+		if (!isnan(cur_inter) && cur_inter < 1 && cur->content != inter.obj)
 			return (0);
 		cur = cur->next;
 	}
@@ -71,7 +100,7 @@ t_intersec	find_nearest_inter(t_scene *scene, t_vector ray)
 	cur = scene->objects.begin;
 	while (cur)
 	{
-		cur_inter = get_intersection(scene->cam.origin, ray, cur->content);
+		cur_inter = get_min_pos(get_intersection(scene->cam.origin, ray, cur->content));
 		if (isnan(res.rlen) || (cur_inter > 1.0 && cur_inter < res.rlen))
 		{
 			res.rlen = cur_inter;
